@@ -1,0 +1,6 @@
+{
+  "appId": "com.streamverse.app",
+  "appName": "StreamVerse",
+  "webDir": "dist",
+  "server": { "androidScheme": "https" }
+}
