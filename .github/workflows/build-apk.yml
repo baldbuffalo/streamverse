@@ -45,12 +45,18 @@ jobs:
           echo "✅ Gradle wrapper updated:"
           cat android/gradle/wrapper/gradle-wrapper.properties
 
-      - name: Upgrade AGP for Gradle 9.x compatibility
+      - name: Upgrade AGP to 9.2.0
         run: |
-          sed -i "s|classpath 'com.android.tools.build:gradle:[^']*'|classpath 'com.android.tools.build:gradle:8.10.1'|g" \
+          sed -i "s|classpath 'com.android.tools.build:gradle:[^']*'|classpath 'com.android.tools.build:gradle:9.2.0'|g" \
             android/build.gradle
           echo "✅ AGP updated:"
           cat android/build.gradle
+
+      - name: Fix proguard for AGP 9.x
+        run: |
+          sed -i "s|getDefaultProguardFile('proguard-android.txt')|getDefaultProguardFile('proguard-android-optimize.txt')|g" \
+            android/app/build.gradle
+          echo "✅ Proguard fixed"
 
       - name: Patch AndroidManifest for Android TV
         run: |
