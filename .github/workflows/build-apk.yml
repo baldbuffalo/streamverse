@@ -38,6 +38,20 @@ jobs:
       - name: Sync web build into Android
         run: npx cap sync android
 
+      - name: Upgrade Gradle wrapper to 9.5.1
+        run: |
+          sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-9.5.1-all.zip|' \
+            android/gradle/wrapper/gradle-wrapper.properties
+          echo "✅ Gradle wrapper updated:"
+          cat android/gradle/wrapper/gradle-wrapper.properties
+
+      - name: Upgrade AGP for Gradle 9.x compatibility
+        run: |
+          sed -i "s|classpath 'com.android.tools.build:gradle:[^']*'|classpath 'com.android.tools.build:gradle:8.10.1'|g" \
+            android/build.gradle
+          echo "✅ AGP updated:"
+          cat android/build.gradle
+
       - name: Patch AndroidManifest for Android TV
         run: |
           python3 - <<'EOF'
