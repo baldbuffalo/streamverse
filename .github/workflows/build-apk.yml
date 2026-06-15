@@ -30,12 +30,6 @@ jobs:
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      - name: Generate Gradle wrapper
-        run: gradle wrapper --gradle-version 9.5.1
-
-      - name: Make gradlew executable
-        run: chmod +x gradlew
-
       - name: Generate release keystore
         run: |
           keytool -genkeypair -v \
@@ -47,7 +41,7 @@ jobs:
             -keypass streamverse123
 
       - name: Build release APK
-        run: ./gradlew assembleRelease --no-daemon
+        run: gradle assembleRelease --no-daemon
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
