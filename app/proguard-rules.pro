@@ -1,0 +1,3 @@
+-keep class com.streamverse.app.data.** { *; }
+-keepattributes *Annotation*
+-dontwarn okhttp3.**

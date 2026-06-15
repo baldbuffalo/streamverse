@@ -1,4 +1,4 @@
-name: Build StreamVerse Android TV APK
+name: Build StreamVerse Native Android TV APK
 
 on:
   push:
@@ -13,69 +13,16 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v6.0.3
 
-      - name: Setup Node 24
-        uses: actions/setup-node@v6.4.0
-        with:
-          node-version: 24
-
       - name: Setup Java 26
         uses: actions/setup-java@v5.2.0
         with:
           distribution: temurin
           java-version: 26
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Vite app
-        run: npm run build
-        env:
-          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
-
-      - name: Add Capacitor Android
-        run: npx cap add android
-
-      - name: Sync web build into Android
-        run: npx cap sync android
-
-      - name: Upgrade Gradle wrapper to 9.5.1
-        run: |
-          sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-9.5.1-all.zip|' \
-            android/gradle/wrapper/gradle-wrapper.properties
-          echo "✅ Gradle wrapper updated:"
-          cat android/gradle/wrapper/gradle-wrapper.properties
-
-      - name: Upgrade AGP to 9.2.0
-        run: |
-          sed -i "s|classpath 'com.android.tools.build:gradle:[^']*'|classpath 'com.android.tools.build:gradle:9.2.0'|g" \
-            android/build.gradle
-          echo "✅ AGP updated:"
-          cat android/build.gradle
-
-      - name: Fix proguard for AGP 9.x
-        run: |
-          sed -i "s|getDefaultProguardFile('proguard-android.txt')|getDefaultProguardFile('proguard-android-optimize.txt')|g" \
-            android/app/build.gradle
-          echo "✅ Proguard fixed"
-
-      - name: Patch AndroidManifest for Android TV
-        run: |
-          python3 - <<'EOF'
-          with open('android/app/src/main/AndroidManifest.xml', 'r') as f:
-              c = f.read()
-
-          tv = '    <uses-feature android:name="android.software.leanback" android:required="true"/>\n    <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>\n'
-          c = c.replace('<application', tv + '    <application', 1)
-
-          c = c.replace(
-              '<category android:name="android.intent.category.LAUNCHER" />',
-              '<category android:name="android.intent.category.LAUNCHER" />\n                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />'
-          )
-
-          with open('android/app/src/main/AndroidManifest.xml', 'w') as f:
-              f.write(c)
-          print("✅ Manifest patched for Android TV")
-          EOF
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.5.1"
 
       - name: Accept Android SDK licenses
         run: |
@@ -83,15 +30,28 @@ jobs:
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      - name: Build debug APK
-        working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Generate release keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore app/streamverse.jks \
+            -alias streamverse \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=StreamVerse,O=StreamVerse,C=US" \
+            -storepass streamverse123 \
+            -keypass streamverse123
+        working-directory: app
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build release APK
+        run: ./gradlew assembleRelease --no-daemon
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: StreamVerse-AndroidTV
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: StreamVerse-AndroidTV-Native
+          path: app/build/outputs/apk/release/app-release.apk
           retention-days: 30
