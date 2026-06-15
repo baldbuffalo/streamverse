@@ -19,7 +19,7 @@ jobs:
           distribution: temurin
           java-version: 26
 
-      - name: Setup Gradle
+      - name: Setup Gradle 9.5.1
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "9.5.1"
@@ -30,6 +30,12 @@ jobs:
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
+      - name: Generate Gradle wrapper
+        run: gradle wrapper --gradle-version 9.5.1
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
       - name: Generate release keystore
         run: |
           keytool -genkeypair -v \
@@ -39,9 +45,6 @@ jobs:
             -dname "CN=StreamVerse,O=StreamVerse,C=US" \
             -storepass streamverse123 \
             -keypass streamverse123
-
-      - name: Make gradlew executable
-        run: chmod +x gradlew
 
       - name: Build release APK
         run: ./gradlew assembleRelease --no-daemon
