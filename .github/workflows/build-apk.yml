@@ -39,7 +39,6 @@ jobs:
             -dname "CN=StreamVerse,O=StreamVerse,C=US" \
             -storepass streamverse123 \
             -keypass streamverse123
-        working-directory: app
 
       - name: Make gradlew executable
         run: chmod +x gradlew
