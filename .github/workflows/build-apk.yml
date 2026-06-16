@@ -46,7 +46,7 @@ jobs:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
       - name: Upload APK
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: StreamVerse-AndroidTV-Native
           path: app/build/outputs/apk/release/app-release.apk
