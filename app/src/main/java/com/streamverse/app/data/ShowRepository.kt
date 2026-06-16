@@ -390,7 +390,7 @@ val ALL_SHOWS = listOf(
         )
     ),
     Show(
-        id="brooklyn-99", title:"Brooklyn Nine-Nine", category="comedy", badge="🚔",
+        id="brooklyn-99", title="Brooklyn Nine-Nine", category="comedy", badge="🚔",
         color=Color(0xFF1A5276), matchPercent=98, rating="TV-14", year=2013, seasonCount=8,
         description="Hilarious ensemble comedy following the quirky detectives of the fictional 99th Precinct of the NYPD.",
         tags=listOf("Comedy","Crime","Workplace"),
