@@ -329,8 +329,8 @@ private fun SeasonSidebar(
 // ── EPISODE LIST ─────────────────────────────────────────────────────
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun EpisodeList(show: Show, season: Int, episodes: List<Episode>) {
-    Column(modifier = Modifier.weight(1f)) {
+private fun EpisodeList(show: Show, season: Int, episodes: List<Episode>, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
         Row(
             modifier              = Modifier.fillMaxWidth().padding(bottom = 22.dp),
             verticalAlignment     = Alignment.CenterVertically,
