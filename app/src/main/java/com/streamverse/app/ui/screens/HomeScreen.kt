@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.*
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.streamverse.app.data.*
 import com.streamverse.app.ui.theme.*
 
