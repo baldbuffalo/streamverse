@@ -1,5 +1,7 @@
 package com.streamverse.app.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -23,6 +26,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.*
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
+import com.streamverse.app.auth.GoogleAuth
 import com.streamverse.app.data.User
 import com.streamverse.app.ui.theme.*
 
@@ -32,6 +38,31 @@ fun LoginScreen(onLogin: (User) -> Unit) {
     var email    by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var loading  by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val context = LocalContext.current
+    val googleSignInClient = remember { GoogleAuth.getClient(context) }
+
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            errorMessage = null
+            onLogin(
+                User(
+                    name  = account.displayName ?: account.email?.substringBefore("@") ?: "Viewer",
+                    email = account.email ?: "viewer@streamverse.com"
+                )
+            )
+        } catch (e: ApiException) {
+            // Status code 12501 = user cancelled the picker; don't show an error for that.
+            if (e.statusCode != 12501) {
+                errorMessage = "Google sign-in failed. Please try again."
+            }
+        }
+    }
 
     // Animated glow pulse
     val glowAlpha by rememberInfiniteTransition(label = "glow").animateFloat(
@@ -168,6 +199,20 @@ fun LoginScreen(onLogin: (User) -> Unit) {
                 )
 
                 Spacer(Modifier.height(20.dp))
+                DividerWithLabel(label = "OR")
+                Spacer(Modifier.height(20.dp))
+
+                // Google Sign-In button
+                TvGoogleSignInButton(
+                    onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) }
+                )
+
+                errorMessage?.let { msg ->
+                    Spacer(Modifier.height(14.dp))
+                    Text(msg, fontSize = 12.sp, color = AccentRed, textAlign = TextAlign.Center)
+                }
+
+                Spacer(Modifier.height(20.dp))
                 Text(
                     text     = "No account? Sign up free",
                     fontSize = 13.sp,
@@ -176,6 +221,15 @@ fun LoginScreen(onLogin: (User) -> Unit) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun DividerWithLabel(label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Box(Modifier.weight(1f).height(1.dp).background(BorderSubtle))
+        Text(label, fontSize = 12.sp, color = TextMuted, modifier = Modifier.padding(horizontal = 12.dp))
+        Box(Modifier.weight(1f).height(1.dp).background(BorderSubtle))
     }
 }
 
@@ -237,5 +291,30 @@ private fun TvSignInButton(loading: Boolean, onClick: () -> Unit) {
             fontSize   = 16.sp,
             fontWeight = FontWeight.Bold
         )
+    }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun TvGoogleSignInButton(onClick: () -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    Button(
+        onClick  = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .onFocusChanged { focused = it.isFocused },
+        colors   = ButtonDefaults.colors(
+            containerColor        = Color(0xFFF1F1F1),
+            focusedContainerColor = Color.White,
+            contentColor          = Color(0xFF1F1F1F),
+            focusedContentColor   = Color(0xFF1F1F1F),
+        ),
+        shape = ButtonDefaults.shape(shape = RoundedCornerShape(10.dp))
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("G", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFF4285F4))
+            Text("Sign in with Google", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        }
     }
 }
