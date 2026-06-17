@@ -57,7 +57,7 @@ dependencies {
 
     // Jetpack Compose for TV
     implementation("androidx.tv:tv-foundation:1.1.0")
-    implementation("androidx.tv:tv-material:1.0.0)
+    implementation("androidx.tv:tv-material:1.0.0")
 
     // Core
     implementation("androidx.core:core-ktx:1.15.0")
