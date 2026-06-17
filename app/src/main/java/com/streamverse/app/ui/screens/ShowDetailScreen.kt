@@ -29,7 +29,7 @@ import com.streamverse.app.ui.theme.*
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun ShowDetailScreen(
+ ShowDetailScreen(
     show: Show,
     user: User?,
     onBack: () -> Unit
@@ -73,7 +73,8 @@ fun ShowDetailScreen(
                     EpisodeList(
                         show     = show,
                         season   = selectedSeason,
-                        episodes = episodes
+                        episodes = episodes,
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
