@@ -40,6 +40,15 @@ jobs:
             -storepass streamverse123 \
             -keypass streamverse123
 
+      - name: Print SHA-1 fingerprint for Google Cloud Console
+        run: |
+          echo "================ SHA-1 FINGERPRINT ================"
+          keytool -list -v \
+            -keystore app/streamverse.jks \
+            -alias streamverse \
+            -storepass streamverse123 | grep "SHA1:"
+          echo "====================================================="
+
       - name: Build release APK
         run: gradle assembleRelease --no-daemon
         env:
