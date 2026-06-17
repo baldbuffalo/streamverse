@@ -47,7 +47,7 @@ android {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2025.05.00")
+    val composeBom = platform("androidx.compose:compose-bom:2026.05.01")
     implementation(composeBom)
 
     implementation("androidx.compose.ui:ui")
@@ -56,20 +56,20 @@ dependencies {
     implementation("androidx.compose.runtime:runtime")
 
     // Jetpack Compose for TV
-    implementation("androidx.tv:tv-foundation:1.0.0-alpha11")
-    implementation("androidx.tv:tv-material:1.0.0-alpha11")
+    implementation("androidx.tv:tv-foundation:1.1.0")
+    implementation("androidx.tv:tv-material:1.0.0)
 
     // Core
     implementation("androidx.core:core-ktx:1.15.0")
-    implementation("androidx.activity:activity-compose:1.9.3")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0-rc01")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0-rc01")
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.8.4")
+    implementation("androidx.navigation:navigation-compose:2.10.0-alpha05")
 
     // Image loading
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("io.coil-kt.coil3:coil-compose:3.5.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
