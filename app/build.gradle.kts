@@ -65,6 +65,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0-rc01")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0-rc01")
 
+     // Google Sign-In (system account picker via Play Services)
+     implementation("com.google.android.gms:play-services-auth:21.6.0")
+
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.10.0-alpha05")
 
