@@ -29,7 +29,7 @@ import com.streamverse.app.ui.theme.*
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
- ShowDetailScreen(
+ fun ShowDetailScreen(
     show: Show,
     user: User?,
     onBack: () -> Unit
