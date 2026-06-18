@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,26 +57,43 @@ import com.streamverse.app.ui.theme.*
 
             // ── SEASONS + EPISODES ──────────────────────────────
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 60.dp, vertical = 40.dp),
-                    horizontalArrangement = Arrangement.spacedBy(40.dp)
-                ) {
-                    // Left: season sidebar
-                    SeasonSidebar(
-                        seasonCount     = show.seasonCount,
-                        selectedSeason  = selectedSeason,
-                        onSeasonSelect  = { selectedSeason = it }
-                    )
+                if (isCompactWidth()) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)) {
+                        SeasonChipsRow(
+                            seasonCount     = show.seasonCount,
+                            selectedSeason  = selectedSeason,
+                            onSeasonSelect  = { selectedSeason = it }
+                        )
+                        Spacer(Modifier.height(20.dp))
+                        EpisodeList(
+                            show     = show,
+                            season   = selectedSeason,
+                            episodes = episodes,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                        )
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 60.dp, vertical = 40.dp),
+                        horizontalArrangement = Arrangement.spacedBy(40.dp)
+                    ) {
+                        // Left: season sidebar
+                        SeasonSidebar(
+                            seasonCount     = show.seasonCount,
+                            selectedSeason  = selectedSeason,
+                            onSeasonSelect  = { selectedSeason = it }
+                        )
 
-                    // Right: episodes
-                    EpisodeList(
-                        show     = show,
-                        season   = selectedSeason,
-                        episodes = episodes,
-                        modifier = Modifier.weight(1f)
-                    )
+                        // Right: episodes
+                        EpisodeList(
+                            show     = show,
+                            season   = selectedSeason,
+                            episodes = episodes,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
 
@@ -95,7 +113,7 @@ private fun DetailNavbar(user: User?, onBack: () -> Unit) {
             .background(Color(0xF705050E))
             .border(width = 1.dp, color = BorderSubtle,
                 shape = RoundedCornerShape(0.dp))
-            .padding(horizontal = 60.dp),
+            .padding(horizontal = if (isCompactWidth()) 16.dp else 60.dp),
         verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -151,10 +169,11 @@ private fun DetailNavbar(user: User?, onBack: () -> Unit) {
 // ── SHOW BANNER ──────────────────────────────────────────────────────
 @Composable
 private fun ShowBanner(show: Show) {
+    val compact = isCompactWidth()
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(380.dp)
+            .height(if (compact) 260.dp else 380.dp)
     ) {
         AsyncImage(
             model              = show.bannerUrl,
@@ -189,7 +208,7 @@ private fun ShowBanner(show: Show) {
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 60.dp, bottom = 32.dp)
+                .padding(start = if (compact) 16.dp else 60.dp, bottom = if (compact) 20.dp else 32.dp)
         ) {
             // Emoji badge
             Box(
@@ -207,10 +226,10 @@ private fun ShowBanner(show: Show) {
             Spacer(Modifier.height(10.dp))
             Text(
                 text          = show.title.uppercase(),
-                fontSize      = 54.sp,
+                fontSize      = if (compact) 28.sp else 54.sp,
                 fontWeight    = FontWeight.Black,
                 letterSpacing = 1.5.sp,
-                lineHeight    = 52.sp,
+                lineHeight    = if (compact) 30.sp else 52.sp,
                 color         = TextPrimary
             )
             Spacer(Modifier.height(10.dp))
@@ -327,6 +346,44 @@ private fun SeasonSidebar(
     }
 }
 
+// ── SEASON CHIPS (compact/phone layout) ───────────────────────────────
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun SeasonChipsRow(
+    seasonCount: Int,
+    selectedSeason: Int,
+    onSeasonSelect: (Int) -> Unit
+) {
+    LazyRow(
+        contentPadding        = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(seasonCount) { index ->
+            val sn     = index + 1
+            val active = selectedSeason == sn
+            var focused by remember { mutableStateOf(false) }
+
+            Surface(
+                onClick  = { onSeasonSelect(sn) },
+                modifier = Modifier.onFocusChanged { focused = it.isFocused },
+                shape    = ClickableSurfaceDefaults.shape(RoundedCornerShape(20.dp)),
+                colors   = ClickableSurfaceDefaults.colors(
+                    containerColor        = if (active) AccentRed else Color(0x0DFFFFFF),
+                    focusedContainerColor = if (active) Color(0xFFFF1A24) else Color(0x1AFFFFFF),
+                )
+            ) {
+                Text(
+                    text       = "S$sn",
+                    fontSize   = 13.sp,
+                    fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+                    color      = if (active) TextPrimary else TextSecondary,
+                    modifier   = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                )
+            }
+        }
+    }
+}
+
 // ── EPISODE LIST ─────────────────────────────────────────────────────
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -368,6 +425,7 @@ private fun EpisodeList(show: Show, season: Int, episodes: List<Episode>, modifi
 @Composable
 private fun EpisodeCard(episode: Episode, showId: String, season: Int) {
     var focused by remember { mutableStateOf(false) }
+    val compact = isCompactWidth()
 
     Surface(
         onClick  = { /* play episode */ },
@@ -389,14 +447,14 @@ private fun EpisodeCard(episode: Episode, showId: String, season: Int) {
         )
     ) {
         Row(
-            modifier              = Modifier.padding(18.dp),
-            horizontalArrangement = Arrangement.spacedBy(18.dp),
+            modifier              = Modifier.padding(if (compact) 12.dp else 18.dp),
+            horizontalArrangement = Arrangement.spacedBy(if (compact) 12.dp else 18.dp),
             verticalAlignment     = Alignment.CenterVertically
         ) {
             // Square episode thumbnail
             Box(
                 modifier = Modifier
-                    .size(162.dp)
+                    .size(if (compact) 110.dp else 162.dp)
                     .clip(RoundedCornerShape(10.dp))
             ) {
                 AsyncImage(
