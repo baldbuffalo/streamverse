@@ -42,6 +42,7 @@ fun LoginScreen(onLogin: (User) -> Unit) {
 
     val context = LocalContext.current
     val googleSignInClient = remember { GoogleAuth.getClient(context) }
+    val compact = isCompactWidth()
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -98,8 +99,8 @@ fun LoginScreen(onLogin: (User) -> Unit) {
             verticalAlignment  = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            // ── LEFT: Branding ────────────────────────────────────
-            Column(
+            // ── LEFT: Branding (hidden on phone-width screens) ────
+            if (!compact) Column(
                 modifier            = Modifier.width(480.dp).padding(end = 60.dp),
                 horizontalAlignment = Alignment.Start
             ) {
@@ -145,11 +146,11 @@ fun LoginScreen(onLogin: (User) -> Unit) {
             // ── RIGHT: Login card ─────────────────────────────────
             Column(
                 modifier = Modifier
-                    .width(420.dp)
+                    .then(if (compact) Modifier.fillMaxWidth(0.92f) else Modifier.width(420.dp))
                     .clip(RoundedCornerShape(20.dp))
                     .background(Color(0xF50C0C1E))
                     .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
-                    .padding(44.dp),
+                    .padding(if (compact) 28.dp else 44.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
