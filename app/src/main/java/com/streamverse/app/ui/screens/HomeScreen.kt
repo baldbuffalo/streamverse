@@ -75,6 +75,7 @@ private fun Navbar(
 ) {
     val navLinks = listOf("Home", "TV Shows", "Movies", "New & Popular", "My List")
     var logoutFocused by remember { mutableStateOf(false) }
+    val compact = isCompactWidth()
 
     Row(
         modifier = Modifier
@@ -85,7 +86,7 @@ private fun Navbar(
                     listOf(Color(0xF705050E), Color.Transparent)
                 )
             )
-            .padding(horizontal = 60.dp),
+            .padding(horizontal = if (compact) 16.dp else 60.dp),
         verticalAlignment      = Alignment.CenterVertically,
         horizontalArrangement  = Arrangement.SpaceBetween
     ) {
@@ -98,8 +99,8 @@ private fun Navbar(
             color      = AccentRed
         )
 
-        // Nav links
-        Row(horizontalArrangement = Arrangement.spacedBy(28.dp)) {
+        // Nav links (hidden on phone-width screens)
+        if (!compact) Row(horizontalArrangement = Arrangement.spacedBy(28.dp)) {
             navLinks.forEach { label ->
                 var focused by remember { mutableStateOf(false) }
                 Text(
@@ -166,10 +167,11 @@ private fun Navbar(
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun HeroBanner(show: Show, onShowClick: (Show) -> Unit) {
+    val compact = isCompactWidth()
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(520.dp)
+            .height(if (compact) 380.dp else 520.dp)
     ) {
         // Backdrop image
         AsyncImage(
@@ -204,7 +206,7 @@ private fun HeroBanner(show: Show, onShowClick: (Show) -> Unit) {
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 60.dp, bottom = 52.dp)
+                .padding(start = if (compact) 16.dp else 60.dp, bottom = if (compact) 24.dp else 52.dp)
         ) {
             // Tags
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -225,9 +227,9 @@ private fun HeroBanner(show: Show, onShowClick: (Show) -> Unit) {
             // Title
             Text(
                 text       = show.title.uppercase(),
-                fontSize   = 68.sp,
+                fontSize   = if (compact) 32.sp else 68.sp,
                 fontWeight = FontWeight.Black,
-                lineHeight = 64.sp,
+                lineHeight = if (compact) 34.sp else 64.sp,
                 color      = TextPrimary,
                 letterSpacing = 2.sp
             )
@@ -297,16 +299,17 @@ private fun CategoryRow(
     shows: List<Show>,
     onShowClick: (Show) -> Unit
 ) {
+    val sidePad = if (isCompactWidth()) 16.dp else 60.dp
     Column(modifier = Modifier.padding(bottom = 40.dp)) {
         Text(
             text       = label,
             fontSize   = 20.sp,
             fontWeight = FontWeight.Bold,
             color      = TextPrimary,
-            modifier   = Modifier.padding(start = 60.dp, bottom = 16.dp)
+            modifier   = Modifier.padding(start = sidePad, bottom = 16.dp)
         )
         LazyRow(
-            contentPadding        = PaddingValues(horizontal = 60.dp),
+            contentPadding        = PaddingValues(horizontal = sidePad),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(shows) { show ->
