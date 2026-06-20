@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
 import com.streamverse.app.auth.GoogleAuth
 import com.streamverse.app.data.ALL_SHOWS
 import com.streamverse.app.data.User
@@ -52,6 +53,7 @@ fun NavGraph() {
                 },
                 onLogout  = {
                     GoogleAuth.getClient(context).signOut()
+                    FirebaseAuth.getInstance().signOut()
                     currentUser = null
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.HOME) { inclusive = true }
