@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.streamverse.app.auth.GoogleAuth
 import com.streamverse.app.data.User
 import com.streamverse.app.ui.theme.*
@@ -50,13 +52,27 @@ fun LoginScreen(onLogin: (User) -> Unit) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)
+            val idToken = account.idToken
             errorMessage = null
-            onLogin(
-                User(
-                    name  = account.displayName ?: account.email?.substringBefore("@") ?: "Viewer",
-                    email = account.email ?: "viewer@streamverse.com"
-                )
-            )
+            if (idToken == null) {
+                errorMessage = "Google sign-in failed. Please try again."
+            } else {
+                val credential = GoogleAuthProvider.getCredential(idToken, null)
+                FirebaseAuth.getInstance().signInWithCredential(credential)
+                    .addOnSuccessListener { authResult ->
+                        val uid = authResult.user?.uid ?: ""
+                        onLogin(
+                            User(
+                                name  = account.displayName ?: account.email?.substringBefore("@") ?: "Viewer",
+                                email = account.email ?: "viewer@streamverse.com",
+                                uid   = uid
+                            )
+                        )
+                    }
+                    .addOnFailureListener {
+                        errorMessage = "Couldn't connect your account. Please try again."
+                    }
+            }
         } catch (e: ApiException) {
             // Status code 12501 = user cancelled the picker; don't show an error for that.
             if (e.statusCode != 12501) {
