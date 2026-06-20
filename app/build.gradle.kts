@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -67,6 +68,14 @@ dependencies {
 
      // Google Sign-In (system account picker via Play Services)
      implementation("com.google.android.gms:play-services-auth:21.6.0")
+
+    // Firebase — Auth (bridges Google Sign-In to a stable per-user UID)
+    // and Firestore (stores "My List" + watch history, synced per Google
+    // account). Using base artifacts, not -ktx: Google now folds Kotlin
+    // extensions into the main modules and is deprecating the -ktx ones.
+    implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.10.0-alpha05")
