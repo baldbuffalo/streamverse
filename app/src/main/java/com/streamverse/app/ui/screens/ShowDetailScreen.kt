@@ -26,6 +26,7 @@ import coil3.compose.AsyncImage
 import com.streamverse.app.data.Episode
 import com.streamverse.app.data.Show
 import com.streamverse.app.data.User
+import com.streamverse.app.data.UserDataRepository
 import com.streamverse.app.ui.theme.*
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -55,8 +56,34 @@ import com.streamverse.app.ui.theme.*
                 ShowBanner(show = show)
             }
 
+            // ── MY LIST TOGGLE (synced via Google account) ──────
+            item {
+                val uid = user?.uid?.takeIf { it.isNotBlank() }
+                if (uid != null) {
+                    var inMyList by remember { mutableStateOf(false) }
+                    DisposableEffect(uid, show.id) {
+                        val reg = UserDataRepository.observeMyList(uid) { ids ->
+                            inMyList = show.id in ids
+                        }
+                        onDispose { reg.remove() }
+                    }
+                    MyListToggleButton(
+                        inMyList = inMyList,
+                        onToggle = {
+                            if (inMyList) UserDataRepository.removeFromMyList(uid, show.id)
+                            else UserDataRepository.addToMyList(uid, show.id)
+                        },
+                        modifier = Modifier.padding(
+                            horizontal = if (isCompactWidth()) 16.dp else 60.dp,
+                            vertical   = 12.dp
+                        )
+                    )
+                }
+            }
+
             // ── SEASONS + EPISODES ──────────────────────────────
             item {
+                val uid = user?.uid?.takeIf { it.isNotBlank() }
                 if (isCompactWidth()) {
                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)) {
                         SeasonChipsRow(
@@ -69,6 +96,7 @@ import com.streamverse.app.ui.theme.*
                             show     = show,
                             season   = selectedSeason,
                             episodes = episodes,
+                            uid      = uid,
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
                         )
                     }
@@ -91,6 +119,7 @@ import com.streamverse.app.ui.theme.*
                             show     = show,
                             season   = selectedSeason,
                             episodes = episodes,
+                            uid      = uid,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -161,6 +190,40 @@ private fun DetailNavbar(user: User?, onBack: () -> Unit) {
                 fontSize   = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color      = TextPrimary
+            )
+        }
+    }
+}
+
+// ── MY LIST TOGGLE BUTTON ────────────────────────────────────────────
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun MyListToggleButton(inMyList: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        onClick  = onToggle,
+        modifier = modifier,
+        shape    = ClickableSurfaceDefaults.shape(RoundedCornerShape(8.dp)),
+        colors   = ClickableSurfaceDefaults.colors(
+            containerColor        = if (inMyList) AccentRed.copy(alpha = 0.15f) else Color(0x0DFFFFFF),
+            focusedContainerColor = if (inMyList) AccentRed.copy(alpha = 0.25f) else Color(0x1AFFFFFF),
+        )
+    ) {
+        Row(
+            verticalAlignment     = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier               = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+        ) {
+            Text(
+                text       = if (inMyList) "✓" else "+",
+                fontSize   = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color      = if (inMyList) AccentRed else TextPrimary
+            )
+            Text(
+                text       = if (inMyList) "In My List" else "Add to My List",
+                fontSize   = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color      = if (inMyList) AccentRed else TextPrimary
             )
         }
     }
@@ -387,7 +450,7 @@ private fun SeasonChipsRow(
 // ── EPISODE LIST ─────────────────────────────────────────────────────
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun EpisodeList(show: Show, season: Int, episodes: List<Episode>, modifier: Modifier = Modifier) {
+private fun EpisodeList(show: Show, season: Int, episodes: List<Episode>, uid: String? = null, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Row(
             modifier              = Modifier.fillMaxWidth().padding(bottom = 22.dp),
@@ -414,7 +477,7 @@ private fun EpisodeList(show: Show, season: Int, episodes: List<Episode>, modifi
 
         // Episode cards
         episodes.forEach { ep ->
-            EpisodeCard(episode = ep, showId = show.id, season = season)
+            EpisodeCard(episode = ep, showId = show.id, season = season, uid = uid)
             Spacer(Modifier.height(14.dp))
         }
     }
@@ -423,12 +486,12 @@ private fun EpisodeList(show: Show, season: Int, episodes: List<Episode>, modifi
 // ── EPISODE CARD ─────────────────────────────────────────────────────
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun EpisodeCard(episode: Episode, showId: String, season: Int) {
+private fun EpisodeCard(episode: Episode, showId: String, season: Int, uid: String? = null) {
     var focused by remember { mutableStateOf(false) }
     val compact = isCompactWidth()
 
     Surface(
-        onClick  = { /* play episode */ },
+        onClick  = { if (uid != null) UserDataRepository.recordWatched(uid, showId, season, episode.number) },
         modifier = Modifier
             .fillMaxWidth()
             .onFocusChanged { focused = it.isFocused },
