@@ -34,6 +34,25 @@ fun HomeScreen(
     onShowClick: (Show) -> Unit,
     onLogout: () -> Unit
 ) {
+    var myListIds by remember { mutableStateOf<List<String>>(emptyList()) }
+    var recentIds by remember { mutableStateOf<List<String>>(emptyList()) }
+    val uid = user?.uid?.takeIf { it.isNotBlank() }
+
+    DisposableEffect(uid) {
+        if (uid == null) {
+            onDispose {}
+        } else {
+            val reg1 = UserDataRepository.observeMyList(uid) { myListIds = it }
+            val reg2 = UserDataRepository.observeRecentlyWatchedShowIds(uid) { recentIds = it }
+            onDispose { reg1.remove(); reg2.remove() }
+        }
+    }
+
+    val myListShows = remember(myListIds) { ALL_SHOWS.filter { it.id in myListIds } }
+    val continueWatchingShows = remember(recentIds) {
+        recentIds.mapNotNull { id -> ALL_SHOWS.find { it.id == id } }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -44,6 +63,20 @@ fun HomeScreen(
             // ── HERO BANNER ──────────────────────────────────────
             item {
                 HeroBanner(show = HERO_SHOW, onShowClick = onShowClick)
+            }
+
+            // ── CONTINUE WATCHING (per-user, synced via Google account) ─
+            if (continueWatchingShows.isNotEmpty()) {
+                item {
+                    CategoryRow(label = "🕐 Continue Watching", shows = continueWatchingShows, onShowClick = onShowClick)
+                }
+            }
+
+            // ── MY LIST (per-user, synced via Google account) ───
+            if (myListShows.isNotEmpty()) {
+                item {
+                    CategoryRow(label = "✅ My List", shows = myListShows, onShowClick = onShowClick)
+                }
             }
 
             // ── CATEGORY ROWS ────────────────────────────────────
