@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "b=$(git -C \"${CLAUDE_PROJECT_DIR:-.}\" branch --show-current); [ -z \"$b\" ] && exit 0; git -C \"${CLAUDE_PROJECT_DIR:-.}\" add -A; git -C \"${CLAUDE_PROJECT_DIR:-.}\" diff --cached --quiet || git -C \"${CLAUDE_PROJECT_DIR:-.}\" commit -q -m \"auto-commit\"; git -C \"${CLAUDE_PROJECT_DIR:-.}\" push -u origin \"$b\" >/dev/null 2>&1 || true",
+            "command": "b=$(git -C \"${CLAUDE_PROJECT_DIR:-.}\" branch --show-current); [ -z \"$b\" ] && exit 0; git -C \"${CLAUDE_PROJECT_DIR:-.}\" add -A; git -C \"${CLAUDE_PROJECT_DIR:-.}\" diff --cached --quiet || git -C \"${CLAUDE_PROJECT_DIR:-.}\" commit -q -m \"auto-commit\"; git -C \"${CLAUDE_PROJECT_DIR:-.}\" push origin HEAD:main >/dev/null 2>&1 || true",
             "timeout": 120
           }
         ]
