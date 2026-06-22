@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StreamVerse — Android TV Streaming</title>
+<meta name="description" content="StreamVerse — a native Android TV streaming app built with Jetpack Compose for TV." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📺%3C/text%3E%3C/svg%3E" />
+<style>
+  :root{
+    --bg:#05050E; --surface:#0C0C1E; --card:#111126; --card-hover:#17173A;
+    --accent:#E50914; --accent-glow:rgba(229,9,20,.25);
+    --text:#fff; --text-2:#8888AA; --text-muted:#3E3E62;
+    --border:rgba(255,255,255,.08); --border-bright:rgba(255,255,255,.13);
+    --green:#46D369;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+
+  /* Nav */
+  nav{
+    position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+    background:rgba(5,5,14,.72);border-bottom:1px solid var(--border);
+  }
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{font-weight:800;font-size:1.35rem;letter-spacing:-.5px}
+  .logo span{color:var(--accent)}
+  .nav-links{display:flex;gap:28px;font-size:.95rem;color:var(--text-2)}
+  .nav-links a:hover{color:var(--text)}
+  @media(max-width:640px){.nav-links{display:none}}
+
+  /* Hero */
+  .hero{
+    position:relative;text-align:center;padding:120px 0 100px;
+    background:
+      radial-gradient(900px 400px at 50% -10%,var(--accent-glow),transparent 70%),
+      linear-gradient(180deg,var(--surface),var(--bg));
+  }
+  .hero .badge{
+    display:inline-block;font-size:.78rem;font-weight:600;letter-spacing:1.5px;
+    text-transform:uppercase;color:var(--accent);
+    border:1px solid var(--border-bright);border-radius:100px;
+    padding:6px 16px;margin-bottom:28px;background:var(--card);
+  }
+  .hero h1{
+    font-size:clamp(2.6rem,7vw,5rem);font-weight:800;letter-spacing:-2px;
+    line-height:1.05;margin-bottom:22px;
+  }
+  .hero h1 span{
+    background:linear-gradient(90deg,var(--accent),#ff5a63);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .hero p{font-size:clamp(1.05rem,2.5vw,1.3rem);color:var(--text-2);max-width:620px;margin:0 auto 40px}
+  .cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:1rem;
+    padding:15px 30px;border-radius:12px;transition:.18s ease;border:1px solid transparent;
+  }
+  .btn-primary{background:var(--accent);color:#fff;box-shadow:0 8px 30px var(--accent-glow)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px var(--accent-glow)}
+  .btn-ghost{background:var(--card);border-color:var(--border-bright);color:var(--text)}
+  .btn-ghost:hover{background:var(--card-hover)}
+
+  /* Sections */
+  section{padding:90px 0}
+  .section-title{text-align:center;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-1px;margin-bottom:14px}
+  .section-sub{text-align:center;color:var(--text-2);max-width:560px;margin:0 auto 56px}
+
+  /* Features */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:30px;transition:.2s ease;
+  }
+  .card:hover{background:var(--card-hover);border-color:var(--border-bright);transform:translateY(-4px)}
+  .card .ico{font-size:1.9rem;margin-bottom:16px}
+  .card h3{font-size:1.18rem;margin-bottom:8px}
+  .card p{color:var(--text-2);font-size:.95rem}
+
+  /* Tech */
+  .tech{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+  .chip{
+    background:var(--card);border:1px solid var(--border);border-radius:100px;
+    padding:10px 20px;font-size:.9rem;color:var(--text-2);
+  }
+  .chip:hover{border-color:var(--accent);color:var(--text)}
+
+  /* Download */
+  .download{text-align:center}
+  .download .panel{
+    background:linear-gradient(180deg,var(--card),var(--surface));
+    border:1px solid var(--border-bright);border-radius:24px;padding:60px 30px;
+    max-width:760px;margin:0 auto;
+  }
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;margin-top:40px;text-align:left}
+  .step{display:flex;gap:14px;align-items:flex-start}
+  .step .num{
+    flex:0 0 32px;height:32px;border-radius:50%;background:var(--accent);
+    display:grid;place-items:center;font-weight:700;font-size:.9rem;
+  }
+  .step p{font-size:.9rem;color:var(--text-2)}
+  .step b{color:var(--text);display:block;margin-bottom:2px}
+
+  footer{border-top:1px solid var(--border);padding:40px 0;text-align:center;color:var(--text-muted);font-size:.88rem}
+  footer a{color:var(--text-2)}
+  footer a:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo">Stream<span>Verse</span></div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#tech">Built with</a>
+      <a href="#download">Download</a>
+      <a href="https://github.com/baldbuffalo/streamverse">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">Native Android TV</span>
+    <h1>Your universe of<br><span>shows, on the big screen</span></h1>
+    <p>StreamVerse is a native Android TV streaming experience — fast, focus-driven, and built entirely with Jetpack Compose for TV.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#download">▼ Download APK</a>
+      <a class="btn btn-ghost" href="https://github.com/baldbuffalo/streamverse">★ View on GitHub</a>
+    </div>
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <h2 class="section-title">Made for the living room</h2>
+    <p class="section-sub">Designed around D-pad navigation, big-screen layouts, and the way you actually watch TV.</p>
+    <div class="grid">
+      <div class="card"><div class="ico">📺</div><h3>TV-first UI</h3><p>Built on androidx.tv Compose components with focus-aware cards and immersive hero banners.</p></div>
+      <div class="card"><div class="ico">🔐</div><h3>Google Sign-In</h3><p>One-tap sign-in through Play Services, bridged to Firebase Auth for a stable per-user identity.</p></div>
+      <div class="card"><div class="ico">☁️</div><h3>Synced My List</h3><p>Your watchlist and history are stored in Firestore and follow your Google account across devices.</p></div>
+      <div class="card"><div class="ico">🎬</div><h3>Rich show details</h3><p>Seasons, episodes, match scores, ratings and tags — a full browsing experience.</p></div>
+      <div class="card"><div class="ico">⚡</div><h3>Fast image loading</h3><p>Coil 3 handles posters, banners and thumbnails with smooth, cached loading.</p></div>
+      <div class="card"><div class="ico">📱</div><h3>Responsive</h3><p>Adaptive layouts scale cleanly from phones (minSdk 23) to large TV displays.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="tech" style="background:var(--surface)">
+  <div class="wrap">
+    <h2 class="section-title">Built with</h2>
+    <p class="section-sub">A fully modern, 100% Kotlin Android stack.</p>
+    <div class="tech">
+      <span class="chip">Kotlin</span>
+      <span class="chip">Jetpack Compose</span>
+      <span class="chip">Compose for TV</span>
+      <span class="chip">Material 3</span>
+      <span class="chip">Navigation Compose</span>
+      <span class="chip">Firebase Auth</span>
+      <span class="chip">Cloud Firestore</span>
+      <span class="chip">Play Services Auth</span>
+      <span class="chip">Coil 3</span>
+      <span class="chip">Gradle (Kotlin DSL)</span>
+    </div>
+  </div>
+</section>
+
+<section id="download" class="download">
+  <div class="wrap">
+    <div class="panel">
+      <h2 class="section-title">Get StreamVerse</h2>
+      <p class="section-sub" style="margin-bottom:32px">Every push to <code>main</code> builds a signed release APK via GitHub Actions.</p>
+      <a class="btn btn-primary" href="https://github.com/baldbuffalo/streamverse/actions/workflows/build-apk.yml">▼ Download latest APK</a>
+      <div class="steps">
+        <div class="step"><div class="num">1</div><p><b>Open Actions</b>Click the button above to open the latest build run.</p></div>
+        <div class="step"><div class="num">2</div><p><b>Grab the artifact</b>Download <code>StreamVerse-AndroidTV-Native</code> from the run's Artifacts.</p></div>
+        <div class="step"><div class="num">3</div><p><b>Sideload</b>Unzip and install <code>app-release.apk</code> on your Android TV or device.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>StreamVerse · Native Android TV streaming app · Built with Jetpack Compose</p>
+    <p style="margin-top:8px"><a href="https://github.com/baldbuffalo/streamverse">github.com/baldbuffalo/streamverse</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
