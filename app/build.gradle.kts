@@ -78,7 +78,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.10.0-alpha05")
+    implementation("androidx.navigation:navigation-compose:2.10.0-alpha06")
 
     // Image loading
     implementation("io.coil-kt.coil3:coil-compose:3.5.0")
