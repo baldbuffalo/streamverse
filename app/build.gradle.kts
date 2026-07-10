@@ -73,7 +73,7 @@ dependencies {
     // and Firestore (stores "My List" + watch history, synced per Google
     // account). Using base artifacts, not -ktx: Google now folds Kotlin
     // extensions into the main modules and is deprecating the -ktx ones.
-    implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.16.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 
